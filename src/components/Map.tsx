@@ -20,49 +20,99 @@ const Map: React.FC = () => {
         const map = new window.google.maps.Map(mapRef.current, {
           center: { lat: 56.1304, lng: -106.3468 }, // Canada coordinates
           zoom: 4,
+          mapTypeControlOptions: { mapTypeIds: [] },
+          streetViewControl: false,
+          styles: [
+            {
+              featureType: "all",
+              elementType: "geometry",
+              stylers: [{ visibility: "off" }],
+            },
+            {
+              featureType: "all",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }],
+            },
+            {
+              featureType: "administrative.province",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }],
+            },
+            {
+              featureType: "administrative.locality",
+              elementType: "labels",
+              stylers: [{ visibility: "on" }],
+            },
+          ],
         });
 
         map.data.loadGeoJson("/data/georef-canada-province@public.geojson");
 
+        fetch("/data/cities.geojson")
+          .then((response) => response.json())
+          .then((data) => {
+            map.data.addGeoJson(data);
+          });
+
         map.data.setStyle((feature) => {
-          const provinceName = feature.getProperty("prov_name_en")[0];
-          let fillColor = "#0000FF"; // Default blue color
+          if (feature.getProperty("prov_name_en") !== undefined) {
+            const provinceName = feature.getProperty("prov_name_en")[0];
+            let fillColor = "#0000FF"; // Default blue color
 
-          const geo_point = feature.getProperty("geo_point_2d");
-          const center = new google.maps.LatLng(geo_point.lat, geo_point.lon);
-          let overlay = new CustomOverlay(center, "0%");
-          // Assign different shades of blue based on the province name
-          console.log("Province Name", provinceName);
-          console.log("GeoPoint2d", feature.getProperty("geo_point_2d"));
-          switch (provinceName) {
-            case "Ontario":
-              console.log("Province name match");
-              overlay = new CustomOverlay(center, "20%");
+            const geo_point = feature.getProperty("geo_point_2d");
+            const center = new google.maps.LatLng(geo_point.lat, geo_point.lon);
+            let overlay = new CustomOverlay(center, "0%");
+            // Assign different shades of blue based on the province name
+            console.log("Province Name", provinceName);
+            console.log("GeoPoint2d", feature.getProperty("geo_point_2d"));
+            switch (provinceName) {
+              case "Ontario":
+                console.log("Province name match");
+                overlay = new CustomOverlay(center, "20%");
 
-              fillColor = "#1E90FF";
-              break;
-            case "Quebec":
-              overlay = new CustomOverlay(center, "15%");
+                fillColor = "#1E90FF";
+                break;
+              case "Quebec":
+                overlay = new CustomOverlay(center, "15%");
 
-              fillColor = "#4169E1";
-              break;
-            case "British Columbia":
-              overlay = new CustomOverlay(center, "35%");
-              fillColor = "#4682B4";
-              break;
-            // Add more cases for other provinces
-            default:
-              fillColor = "#87CEFA";
+                fillColor = "#4169E1";
+                break;
+              case "British Columbia":
+                overlay = new CustomOverlay(center, "35%");
+                fillColor = "#4682B4";
+                break;
+              // Add more cases for other provinces
+              default:
+                fillColor = "#87CEFA";
+            }
+
+            overlay.setMap(map);
+
+            return {
+              fillColor: fillColor,
+              fillOpacity: 0.6,
+              strokeColor: "#0000FF",
+              strokeWeight: 1,
+            };
+          } else {
+            // This should add a circle on Toronto
+            const cityName = feature.getProperty("name");
+            console.log("City name", cityName);
+            let fillColor = "#000000"; // Default blue color
+            let icon = getCircle(0);
+            if (cityName === "Toronto") {
+              icon = getCircle(3);
+            }
+            return {
+              fillColor: fillColor,
+              fillOpacity: 0.6,
+              strokeColor: "#0000FF",
+              strokeWeight: 1,
+              label: "20%",
+              visible: true,
+              icon: icon,
+            };
           }
-
-          overlay.setMap(map);
-
-          return {
-            fillColor: fillColor,
-            fillOpacity: 0.6,
-            strokeColor: "#0000FF",
-            strokeWeight: 1,
-          };
         });
 
         // Custom Overlay Class
@@ -113,7 +163,6 @@ const Map: React.FC = () => {
             }
           }
         }
-
         // Add the custom overlay to the map
       }
     };
@@ -123,6 +172,17 @@ const Map: React.FC = () => {
       document.head.removeChild(script);
     };
   }, []);
+
+  function getCircle(magnitude: number): google.maps.Symbol {
+    return {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: "red",
+      fillOpacity: 0.2,
+      scale: Math.pow(2, magnitude) / 2,
+      strokeColor: "white",
+      strokeWeight: 0.5,
+    };
+  }
 
   return <div ref={mapRef} style={{ width: "100%", height: "400px" }} />;
 };

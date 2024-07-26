@@ -1,0 +1,55 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Toronto"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.3832, 43.6532]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Montreal"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.5673, 45.5017]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Vancouver"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.1216, 49.2827]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calgary"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-114.0719, 51.0447]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Edmonton"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-113.4909, 53.5444]
+      }
+    }
+  ]
+}
